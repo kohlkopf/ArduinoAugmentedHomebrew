@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<title>Arduino Yun I/O Demo</title>
+		<script type="text/javascript">
+		window.onload=Pinstatus;
+
+		function Pinstatus(){
+			morestatus();
+		}
+		function morestatus(){
+			setTimeout(morestatus, 2000);
+			document.getElementById("description").innerHTML = "Processing Status";
+			server = "/arduino/status/99";
+			request = new XMLHttpRequest();
+			request.onreadystatechange = updateasyncstatus;
+			request.open("GET", server, true);
+			request.send(null);
+		}
+		function updateasyncstatus() {
+			if ((request.readyState == 4) && (request.status == 200)) {
+				result = request.responseText;
+				document.getElementById("description").innerHTML = result;
+				fullset = result.split("#");
+				document.getElementById("description").innerHTML = fullset;
+				for(i = 1; i < fullset.length; i++) {
+					PinPair = fullset[i];
+					singleset = PinPair.split("=");
+					PN = singleset[0];
+					Pinstatus = singleset[1];
+					if (PN > 11)
+					{
+					ActNum = "action" + PN;
+					ImgNum = "image" + PN;
+
+					if (Pinstatus == 0) {
+						PinAct = "1";
+						image = "off.jpg";
+					} else {
+						PinAct = "0";
+						image = "on.jpg";
+					}
+						document.getElementById(ActNum).value = PinAct;
+						document.getElementById(ImgNum).src = image;
+					}
+
+					if (PN == 2) {
+						ImgNum = "image" + PN;
+						if (Pinstatus == 1) {
+							image = "on.jpg";
+						} else {
+							image = "off.jpg";
+						}
+						document.getElementById(ImgNum).src = image;
+					}
+
+					if (PN == 3 ) {
+						PinVal = parseInt(singleset[1]);
+						DacNum = "dac" + PN;
+						ValNum = "valueDac" + PN;
+						document.getElementById(DacNum).value = PinVal;
+						document.getElementById(ValNum).innerHTML = PinVal;
+					}
+
+					if (PN.substr(0,1) == "A") {
+						PinVal = parseFloat(singleset[1]);
+						AnalogNum = "analog" + PN.substr(1,2);
+						document.getElementById(AnalogNum).value = PinVal;
+					}
+				}
+			}
+		}
+		function sendbutton(Pin,action){
+			document.getElementById("description").innerHTML = "Processing Button Click";
+			server = "/arduino/digital/" + Pin + "/" + action;
+			request = new XMLHttpRequest();
+			request.onreadystatechange = updateasyncbutton;
+			request.open("GET", server, true);
+			request.send(null);
+		}
+		function updateasyncbutton(){
+				if ((request.readyState == 4) && (request.status == 200)) {
+					result = request.responseText;
+					document.getElementById("description").innerHTML = result;
+					singleset = result.split(",");
+					PinType = singleset[0];
+					PinNum = singleset[1];
+					Pinstatus = singleset[2];
+					ActNum = "action" + PinNum;
+					ImgNum = "image" + PinNum;
+					if (Pinstatus == 0) {
+						PinAct = "1";
+						image = "off.png";
+					} else {
+						PinAct = "0";
+						image = "on.png";
+					}
+
+					document.getElementById(ActNum).value = PinAct;
+					document.getElementById(ImgNum).src = image;
+					document.getElementById("description").innerHTML = result;
+				}
+		}
+		function sendDac(Pin,value){
+			ValNum = "valueDac" + Pin;
+			document.getElementById(ValNum).innerHTML=value;
+			document.getElementById("description").innerHTML = "Processing Slider";
+			server = "/arduino/dac/" + Pin + "/" + value;
+			request = new XMLHttpRequest();
+			request.onreadystatechange = updateasyncDac;
+			request.open("GET", server, true);
+			request.send(null);
+		}
+		function updateasyncDac(){
+			if ((request.readyState == 4) && (request.status == 200)) {
+				result = request.responseText;
+				singleset = result.split(",");
+				PinType = singleset[0];
+				PinNum = singleset[1];
+				PinVal = parseInt(singleset[2]);
+				DacNum = "dac" + PinNum;
+				ValNum = "valueDac" + PinNum;
+				document.getElementById(DacNum).value = PinVal;
+				document.getElementById(ValNum).innerHTML = PinVal;
+				document.getElementById("description").innerHTML = result;
+			}		}
+			</script>		<style>			table {				width:90%;			}			.current-temp{				font-size:5em;				color:red;			}			input#analog0 {				font-size:5em;				color:red;			}			.goal-temp {				font-size:5em;				color:green;			}			span#valueDac3 {				font-size:5em;				color:green;			}			input[type=range] {		  -webkit-appearance: none;		  margin: 18px 0;		  width: 100%;		}		input[type=range]:focus {		  outline: none;		}		input[type=range]::-webkit-slider-runnable-track {		  width: 100%;		  height: 8.4px;		  cursor: pointer;		  animate: 0.2s;		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		  background: #3071a9;		  border-radius: 1.3px;		  border: 0.2px solid #010101;		}		input[type=range]::-webkit-slider-thumb {		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		  border: 1px solid #000000;		  height: 36px;		  width: 16px;		  border-radius: 10px;		  background: #ffffff;		  cursor: pointer;		  -webkit-appearance: none;		  margin-top: -14px;		}		input[type=range]:focus::-webkit-slider-runnable-track {		  background: #367ebd;		}		input[type=range]::-moz-range-track {		  width: 100%;		  height: 8.4px;		  cursor: pointer;		  animate: 0.2s;		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		  background: #3071a9;		  border-radius: 1.3px;		  border: 0.2px solid #010101;		}		input[type=range]::-moz-range-thumb {		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		  border: 1px solid #000000;		  height: 36px;		  width: 16px;		  border-radius: 10px;		  background: #ffffff;		  cursor: pointer;		}		input[type=range]::-ms-track {		  width: 100%;		  height: 8.4px;		  cursor: pointer;		  animate: 0.2s;		  background: transparent;		  border-color: transparent;		  border-width: 16px 0;		  color: transparent;		}		input[type=range]::-ms-fill-lower {		  background: #2a6495;		  border: 0.2px solid #010101;		  border-radius: 2.6px;		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		}		input[type=range]::-ms-fill-upper {		  background: #3071a9;		  border: 0.2px solid #010101;		  border-radius: 2.6px;		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		}		input[type=range]::-ms-thumb {		  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;		  border: 1px solid #000000;		  height: 36px;		  width: 16px;		  border-radius: 10px;		  background: #ffffff;		  cursor: pointer;		}		input[type=range]:focus::-ms-fill-lower {		  background: #3071a9;		}		input[type=range]:focus::-ms-fill-upper {		  background: #367ebd;		}		</style>
+
+	</head>
+	<font face="Arial">		<table name="Table" border="0" cellpadding="6">			<tr> <th align="center" colspan="6" >Input ADC</th></tr>			<tr>				<td align="center">					<span class="current-temp">Current Temp (F)</span>					<br>					<input type="text" style="text-align: center;" name="analogA1" id="analog1" value="1" size="6" readonly/>				</td>			</tr>			<tr> <th align="center" colspan="6" >Input digital</th></tr>			<tr>				<td align="center">					2					<br>					<img src="off.jpg" width="50" id="image2" />				</td>			</tr>			<tr> <th align="center" colspan="6" >DAC</th></tr>			<tr>				<td align="center">					<span class="goal-temp">Goal Temp (F)</span>					<br>					<input type="hidden" name="pin" value="3" id="pin3" />					<span style="float:left;">0 F</span><span style="float:right">212 F</span>					<input type="range" id="dac3" min="0" max="212" value="0" step="1" onchange="sendDac(document.getElementById('pin3').value, this.value);"/>					<br>					<span id="valueDac3">0</span>				</td>			</tr>			<tr> <th align="center" colspan="6" >Output button</th></tr>			<tr>				<td align="center">					12					<br>					<input type="hidden" name="pin" value="12" id="pin12" />					<input type="hidden" name="action" value="0" id="action12" />					<img src="off.png" width="50" id="image12" onclick="sendbutton(document.getElementById('pin12').value,document.getElementById('action12').value);"/>				</td>			</tr>			<tr>				<td align="center">					13					<br>					<input type="hidden" name="pin" value="13" id="pin13" />					<input type="hidden" name="action" value="0" id="action13" />					<img src="off.png" width="50" id="image13" onclick="sendbutton(document.getElementById('pin13').value,document.getElementById('action13').value);"/>				</td>			</tr>		</table>		<br><br>		<br><br>		<p id="description"> - </p>	</font></html>
